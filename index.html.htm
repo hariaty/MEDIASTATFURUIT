@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="id"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STATFRUIT</title>
+
+<style>
+
+body{
+    margin:0;
+    padding:0;
+    font-family:Arial, sans-serif;
+    background:#f7f7f7;
+    text-align:center;
+}
+
+/* HEADER */
+.header{
+    background:#dcedc8;
+    padding:20px;
+    border-bottom:3px solid #aed581;
+}
+
+.header h1{
+    color:#33691e;
+    margin:0;
+    font-size:40px;
+}
+
+/* KODE BUAH */
+.kode{
+    display:flex;
+    justify-content:center;
+    gap:60px;
+    flex-wrap:wrap;
+    margin-top:20px;
+    font-size:28px;
+    color:#333;
+}
+
+/* AREA DADU */
+.scene{
+    width:260px;
+    height:260px;
+    margin:80px auto 40px;
+    perspective:1000px;
+}
+
+.dice{
+    width:100%;
+    height:100%;
+    position:relative;
+    transform-style:preserve-3d;
+    transition:transform 2s;
+}
+
+/* SISI DADU */
+.face{
+    position:absolute;
+    width:260px;
+    height:260px;
+    background:white;
+    border-radius:35px;
+    border:3px solid #eee;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:120px;
+
+    box-shadow:
+    inset -10px -10px 20px rgba(0,0,0,0.05),
+    0 10px 25px rgba(0,0,0,0.1);
+}
+
+/* POSISI SISI */
+.front  { transform: rotateY(0deg) translateZ(130px); }
+.back   { transform: rotateY(180deg) translateZ(130px); }
+.right  { transform: rotateY(90deg) translateZ(130px); }
+.left   { transform: rotateY(-90deg) translateZ(130px); }
+.top    { transform: rotateX(90deg) translateZ(130px); }
+.bottom { transform: rotateX(-90deg) translateZ(130px); }
+
+/* TOMBOL */
+button{
+    background:#ff9800;
+    color:white;
+    border:none;
+    padding:18px 40px;
+    font-size:28px;
+    border-radius:20px;
+    cursor:pointer;
+    margin-top:20px;
+
+    box-shadow:0 5px 15px rgba(0,0,0,0.15);
+}
+
+button:hover{
+    background:#fb8c00;
+}
+
+/* HASIL */
+#hasil{
+    font-size:35px;
+    margin-top:30px;
+    color:#2e7d32;
+    font-weight:bold;
+}
+
+/* TABEL */
+table{
+    margin:40px auto;
+    width:80%;
+    border-collapse:collapse;
+    background:white;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+th{
+    background:#dcedc8;
+    padding:15px;
+    font-size:24px;
+}
+
+td{
+    padding:15px;
+    border-bottom:1px solid #eee;
+    font-size:22px;
+}
+
+.info{
+    background:#f1f8e9;
+    width:80%;
+    margin:20px auto;
+    padding:20px;
+    border-radius:20px;
+    font-size:22px;
+}
+
+</style>
+</head>
+
+<body>
+<!-- HALAMAN PEMBUKA -->
+<div id="openingScreen">
+
+<h1>🍎 Welcome to STATFRUIT 🎲</h1>
+
+<p>
+Mari belajar sambil bermain
+</p>
+
+<button onclick="mulaiGame()">
+▶️ PLAY
+</button>
+
+</div>
+
+<!-- ISI GAME -->
+<div id="mainGame" style="display:none;">
+<!-- HEADER -->
+<div class="header">
+
+<h1>🍎 STATFRUIT 🎲</h1>
+
+<div class="kode">
+
+<div>🍐 Pir = 3</div>
+<div>🥑 Alpukat = 7</div>
+<div>🍉 Semangka = 8</div>
+<div>🍊 Jeruk = 5</div>
+<div>🍎 Apel = 4</div>
+<div>🍌 Pisang = 6</div>
+
+</div>
+
+</div>
+
+<!-- DADU -->
+<div class="scene">
+
+<div class="dice" id="dice">
+
+<div class="face front">🍐</div>
+<div class="face back">🥑</div>
+<div class="face right">🍉</div>
+<div class="face left">🍊</div>
+<div class="face top">🍎</div>
+<div class="face bottom">🍌</div>
+
+</div>
+
+</div>
+
+<h3>Pilih Jumlah Lemparan</h3>
+
+<select id="jumlahLemparan" onchange="updateInfo()">
+
+<option value="5">5 Kali</option>
+<option value="10">10 Kali</option>
+<option value="15" selected="selected">15 Kali</option>
+<option value="20">20 Kali</option>
+<option value="25">25 Kali</option>
+<option value="30">30 Kali</option>
+<option value="35">35 Kali</option>
+<option value="40">40 Kali</option>
+<option value="45">45 Kali</option>
+<option value="50">50 Kali</option>
+
+</select>
+<button onclick="lemparDadu()">
+🎲 Lempar Dadu
+
+    <source src="STATFRUIT%20ini%20bangat%20bangat%20fiks_files/musik.mp3" type="audio/mpeg">
+
+</button>
+
+<div id="hasil">
+Hasil akan muncul di sini
+</div>
+
+<!-- TABEL -->
+<table>
+
+<thead>
+<tr>
+<th>No</th>
+<th>Buah</th>
+<th>Kode</th>
+</tr>
+</thead>
+
+<tbody id="tableBody">
+
+</tbody>
+
+</table>
+
+<!-- PEMUSATAN DATA -->
+
+<div class="box-hitung">
+
+<h2>🧠 Hitung Pemusatan Data</h2>
+
+<div class="jawaban">
+
+<div class="card-jawab">
+
+<input type="text" id="meanInput" placeholder="Isi Mean">
+
+<p id="meanPesan"></p>
+
+<input type="text" id="medianInput" placeholder="Isi Median">
+
+<p id="medianPesan"></p>
+
+<input type="text" id="modusInput" placeholder="Isi Modus">
+
+<p id="modusPesan"></p>
+</div>
+
+</div>
+
+</div>
+
+<div class="info" id="infoText">
+💡 Lempar dadu sebanyak 15 kali, lalu hitung sendiri
+Mean, Median, dan Modusnya!
+</div>
+
+<script>
+
+const dice =
+document.getElementById("dice");
+
+const hasil =
+document.getElementById("hasil");
+
+const tableBody =
+document.getElementById("tableBody");
+
+let count = 0;
+
+let dataKode = [];
+
+/* MENENTUKAN MODUS UTAMA */
+
+const fruits = [
+
+{
+emoji:"🍐",
+name:"Pir",
+code:3,
+rotate:"rotateY(0deg)"
+},
+
+{
+emoji:"🥑",
+name:"Alpukat",
+code:7,
+rotate:"rotateY(180deg)"
+},
+
+{
+emoji:"🍉",
+name:"Semangka",
+code:8,
+rotate:"rotateY(-90deg)"
+},
+
+{
+emoji:"🍊",
+name:"Jeruk",
+code:5,
+rotate:"rotateY(90deg)"
+},
+
+{
+emoji:"🍎",
+name:"Apel",
+code:4,
+rotate:"rotateX(-90deg)"
+},
+
+{
+emoji:"🍌",
+name:"Pisang",
+code:6,
+rotate:"rotateX(90deg)"
+}
+
+];
+let modusUtama =
+fruits[
+Math.floor(Math.random()*fruits.length)
+].name;
+
+function lemparDadu(){
+
+let maxLempar = parseInt(
+document.getElementById("jumlahLemparan").value
+);
+
+if(count >= maxLempar){
+alert(
+"Percobaan sudah "
++ maxLempar +
+" kali!"
+);
+return;
+}
+
+const random =
+fruits[Math.floor(Math.random()*fruits.length)];
+
+const x =
+(Math.floor(Math.random()*4)+3)*360;
+
+const y =
+(Math.floor(Math.random()*4)+3)*360;
+
+dice.style.transform =
+`rotateX(${x}deg)
+ rotateY(${y}deg)
+ ${random.rotate}`;
+
+hasil.innerHTML =
+"🎲 Dadu sedang diputar...";
+
+setTimeout(()=>{
+
+hasil.innerHTML =
+`${random.emoji} ${random.name}
+ = ${random.code}`;
+
+count++;
+
+dataKode.push(random.code);
+
+let row = `
+<tr>
+<td>${count}</td>
+<td>${random.emoji} ${random.name}</td>
+<td>${random.code}</td>
+</tr>
+`;
+
+tableBody.innerHTML += row;
+
+},2000);
+
+}
+
+function cekJawaban(){
+
+/* MEAN */
+
+let jumlah =
+dataKode.reduce((a,b)=>a+b,0);
+
+let mean =
+(jumlah / dataKode.length).toFixed(2);
+
+/* MEDIAN */
+
+let urut =
+[...dataKode].sort((a,b)=>a-b);
+
+let median =
+urut[Math.floor(urut.length/2)];
+
+/* MODUS */
+
+let frek = {};
+
+dataKode.forEach(x=>{
+frek[x] = (frek[x] || 0) + 1;
+});
+
+let modus =
+Object.keys(frek).reduce((a,b)=>
+frek[a] > frek[b] ? a : b
+);
+
+/* INPUT */
+
+let meanInput =
+document.getElementById("meanInput");
+
+let medianInput =
+document.getElementById("medianInput");
+
+let modusInput =
+document.getElementById("modusInput");
+
+/* CEK */
+
+cekWarna(
+meanInput,
+mean,
+"meanPesan"
+);
+
+cekWarna(
+medianInput,
+median,
+"medianPesan"
+);
+
+cekWarna(
+modusInput,
+modus,
+"modusPesan"
+);
+
+}
+
+function cekWarna(
+input,
+jawaban,
+pesanId
+){
+
+let pesan =
+document.getElementById(pesanId);
+
+if(input.value == jawaban){
+
+input.style.background =
+"#C8E6C9";
+
+input.style.border =
+"3px solid green";
+
+pesan.innerHTML =
+"✅ Benar!";
+
+pesan.style.color =
+"green";
+
+}else{
+
+input.style.background =
+"#FFCDD2";
+
+input.style.border =
+"3px solid red";
+
+pesan.innerHTML =
+"❌ Jawaban benar: " + jawaban;
+
+pesan.style.color =
+"red";
+
+}
+
+}
+function resetPercobaan(){
+
+/* RESET JUMLAH */
+
+count = 0;
+
+/* RESET DATA */
+
+dataKode = [];
+
+/* RESET TABEL */
+
+tableBody.innerHTML = "";
+
+/* RESET HASIL */
+
+hasil.innerHTML =
+"Hasil akan muncul di sini";
+
+/* RESET INPUT */
+
+document.getElementById("meanInput").value = "";
+document.getElementById("medianInput").value = "";
+document.getElementById("modusInput").value = "";
+
+/* RESET PESAN */
+
+document.getElementById("meanPesan").innerHTML = "";
+document.getElementById("medianPesan").innerHTML = "";
+document.getElementById("modusPesan").innerHTML = "";
+
+/* RESET WARNA INPUT */
+
+let inputs = [
+document.getElementById("meanInput"),
+document.getElementById("medianInput"),
+document.getElementById("modusInput")
+];
+
+inputs.forEach(input=>{
+
+input.style.background = "white";
+
+input.style.border =
+"1px solid #ccc";
+
+});
+
+/* RESET POSISI DADU */
+
+dice.style.transform =
+"rotateX(0deg) rotateY(0deg)";
+
+/* RESET MODUS UTAMA */
+
+modusUtama =
+fruits[
+Math.floor(Math.random()*fruits.length)
+].name;
+
+}
+function updateInfo(){
+
+let jumlah = document.getElementById(
+"jumlahLemparan"
+).value;
+
+document.getElementById(
+"infoText"
+).innerHTML =
+"💡 Lempar dadu sebanyak "
++ jumlah +
+" kali, lalu hitung sendiri Mean, Median, dan Modusnya!";
+
+}
+</script>
+
+<button onclick="cekJawaban()">
+✅ Cek Jawaban
+</button>
+<button onclick="resetPercobaan()">
+🔄 Ulangi Percobaan
+</button>
+    <source src="STATFRUIT%20ini%20bangat%20bangat%20fiks_files/musik.mp3" type="audio/mpeg">
+
+</div>
+
+<script>
+function mulaiGame() {
+    document.getElementById("openingScreen").style.display = "none";
+    document.getElementById("mainGame").style.display = "block";
+}
+function putarMusik(){
+
+document.getElementById(
+"musik"
+).play();
+
+}
+function toggleMusik(){
+
+const musik =
+document.getElementById("musik");
+
+const tombol =
+document.getElementById("btnMusik");
+
+if(musik.paused){
+
+musik.play();
+
+tombol.innerHTML =
+"🔇 Matikan Musik";
+
+}else{
+
+musik.pause();
+musik.currentTime = 0; 
+
+tombol.innerHTML =
+"🎵 Putar Musik";
+
+}
+
+}
+function mulaiGame(){
+
+document.getElementById(
+"openingScreen"
+).style.display = "none";
+
+document.getElementById(
+"mainGame"
+).style.display = "block";
+
+}
+</script>
+
+<button onclick="toggleMusik()" id="btnMusik">
+🎵 Putar Musik
+</button>
+
+<audio id="musik" loop="">
+  <source src="STATFRUIT%20ini%20bangat%20bangat%20fiks_files/musik.mp3" type="audio/mpeg">
+</audio>
+
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
+
+</body></html>
